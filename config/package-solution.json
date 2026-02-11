@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "approval-portal-client-side-solution",
+    "id": "140f727d-f9b9-4ca2-a837-610a65869a55",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.22.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "approval-portal description"
+      },
+      "longDescription": {
+        "default": "approval-portal description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "approval-portal Feature",
+        "description": "The feature that activates elements of the approval-portal solution.",
+        "id": "1e071f10-d256-48c6-ae04-bc8db1b52561",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/approval-portal.sppkg"
+  }
+}

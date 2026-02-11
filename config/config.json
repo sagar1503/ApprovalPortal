@@ -1,0 +1,19 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "approval-portal-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/approvalPortal/ApprovalPortalWebPart.js",
+          "manifest": "./src/webparts/approvalPortal/ApprovalPortalWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "ApprovalPortalWebPartStrings": "lib/webparts/approvalPortal/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+  }
+}

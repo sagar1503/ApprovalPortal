@@ -1,0 +1,4 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/sass.schema.json",
+  "dropCssFiles": true
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/@microsoft/spfx-web-build-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    "lib": [
+      "es6",
+      "dom",
+      "es2017"
+    ]
+  }
+}

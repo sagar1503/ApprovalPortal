@@ -1,0 +1,22 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "approval-portal",
+    "environment": "spo",
+    "packageManager": "npm",
+    "skipFeatureDeployment": true,
+    "useGulp": false,
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "ApprovalPortal",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "20.10.0",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "approval-portal",
+    "libraryId": "140f727d-f9b9-4ca2-a837-610a65869a55",
+    "solutionShortDescription": "approval-portal description",
+    "isDomainIsolated": false
+  }
+}

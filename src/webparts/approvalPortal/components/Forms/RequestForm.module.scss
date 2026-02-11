@@ -1,0 +1,128 @@
+.formContainer {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.formHeader {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #F3F4F6;
+    letter-spacing: -0.3px;
+}
+
+.formField {
+    margin-bottom: 20px;
+
+    label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 6px;
+    }
+}
+
+.buttonRow {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid #F3F4F6;
+}
+
+.primaryButton {
+    background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+    color: white;
+    border: none;
+    padding: 11px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        background: #E5E7EB;
+        color: #9CA3AF;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+}
+
+.secondaryButton {
+    background-color: transparent;
+    color: #4B5563;
+    border: 1px solid #E5E7EB;
+    padding: 11px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: #F9FAFB;
+        border-color: #D1D5DB;
+    }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+    .formContainer {
+        padding: 24px;
+        border-radius: 16px;
+    }
+
+    .formHeader {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+
+    .buttonRow {
+        flex-wrap: wrap;
+    }
+
+    .primaryButton,
+    .secondaryButton {
+        flex: 1;
+        text-align: center;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .formContainer {
+        padding: 16px;
+    }
+
+    .buttonRow {
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+
+    .primaryButton,
+    .secondaryButton {
+        width: 100%;
+        padding: 13px 20px;
+    }
+}
