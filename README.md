@@ -71,6 +71,38 @@ Manages temporary approval reassignment.
 Immutable log of all workflow actions.
 -   **Columns**: RequestID (Lookup), Action (Text), Actor (Person), Comments (Note), Snapshot (Note), Timestamp (Date).
 
+```mermaid
+erDiagram
+    Main_Requests ||--o{ Sys_AuditLog : "has history"
+    Main_Requests }|--|| Config_ApprovalMatrix : "follows rules"
+    Config_Delegations }|--|| Main_Requests : "approves on behalf"
+    
+    Main_Requests {
+        int ID
+        string Title
+        string RequestType
+        string CurrentStatus
+        int StageID
+        person Requester
+        person CurrentAssignee
+    }
+    
+    Config_ApprovalMatrix {
+        string RequestType
+        int StageOrder
+        string StageName
+        string Condition
+    }
+    
+    Sys_AuditLog {
+        int RequestID
+        string Action
+        person Actor
+        string Comments
+        datetime Timestamp
+    }
+```
+
 
 ## 🔮 Future Roadmap
 
@@ -90,10 +122,75 @@ The core processing logic acting as a state machine. It handles:
 -   **Condition Evaluation**: determining if a stage should be skipped based on request data.
 -   **Notification Dispatching**: Sending emails via `sp.utility.sendEmail`.
 
+```mermaid
+graph TD
+    A[Start Transition] --> B{Validation}
+    B -- Unauthorized --> Z[Error]
+    B -- Authorized --> C{Action Type}
+    
+    C -- Reject --> D[Update Status: Rejected]
+    D --> E[Notify Requester]
+    
+    C -- Request Info --> F[Update Status: Info Requested]
+    F --> E
+    
+    C -- Provide Info --> G[Find Original Approver]
+    G --> H[Restore Previous Stage]
+    H --> I[Notify Approver]
+    
+    C -- Approve --> J[Unresolved Next Stage]
+    J --> K{Check Conditions}
+    K -- Skip --> J
+    K -- Met --> L[Resolve Approver]
+    
+    L --> M{Delegation Check}
+    M -- Active --> N[Assign to Delegate]
+    M -- None --> O[Assign to Approver]
+    
+    N --> P[Update Request]
+    O --> P
+    P --> Q[Notify Next Approver]
+```
+
 ### Data Service (`AppDataService.ts`)
 Centralized layer for all SharePoint interactions using PnPjs.
 -   Abstracts REST calls for Items, Profiles, and Emails.
 -   Implements retry logic and error handling.
+
+### Component Architecture
+
+```mermaid
+graph TD
+    App[ApprovalPortalWebPart] --> Main[ApprovalPortal.tsx]
+    
+    Main --> Service[AppDataService]
+    Main --> Engine[WorkflowEngine]
+    
+    Main --> Layout[PageLayout]
+    Layout --> Sidebar[Sidebar Navigation]
+    Layout --> Content{Active Tab}
+    
+    Content -- "My Requests" --> Dashboard[Dashboard Component]
+    Content -- "Pending" --> Dashboard
+    
+    Dashboard --> List[RequestList]
+    List --> Item[RequestItem]
+    
+    Content -- "New Request" --> Form[RequestForm]
+    Form --> Validation[Form Validation]
+```
+
+## 📸 UI Gallery
+
+> *Note: Placeholders for project screenshots.*
+
+### Dashboard View
+![Dashboard View](docs/images/dashboard.png)
+*Central hub for managing approvals and tracking request status.*
+
+### Request Submission Form
+![Request Form](docs/images/request_form.png)
+*Dynamic form for submitting new approval requests.*
 
 ## 📝 License
 [MIT](LICENSE)
