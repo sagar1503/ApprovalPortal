@@ -1,77 +1,99 @@
-# approval-portal
+# Approval Portal
 
-## Summary
+A robust SharePoint Framework (SPFx) application designed to streamline business approval workflows. This solution features a dynamic rule-based engine, customizable approval matrices, and comprehensive audit trails.
 
-Short summary on functionality and used technologies.
+## 🚀 Features
 
-[picture of the solution in action, if possible]
+-   **Dynamic Workflow Engine**: Automated transition of requests between stages based on configurable logic.
+-   **Configurable Approval Matrix**: Define approval flows (Linear, Conditional, Dynamic Managers) without code changes via SharePoint Lists.
+-   **Role-Based Access**: Specialized views for Requesters, Approvers, and Admins.
+-   **Delegate Management**: Handle Out-of-Office scenarios with automatic task delegation.
+-   **Audit Logging**: Detailed, immutable history of all actions, comments, and state changes.
+-   **Email Notifications**: Automated alerts for approvals, rejections, information requests, and delegation.
 
-## Used SharePoint Framework Version
+## 🛠 Tech Stack
 
-![version](https://img.shields.io/badge/version-1.22.2-green.svg)
+-   **Framework**: SharePoint Framework (SPFx) 1.22.2
+-   **Frontend**: React 17, Fluent UI
+-   **Data Interaction**: PnPjs v4
+-   **Build Tools**: Gulp, Webpack, Heft
 
-## Applies to
+## 📦 Installation & Setup
 
-- [SharePoint Framework](https://aka.ms/spfx)
-- [Microsoft 365 tenant](https://docs.microsoft.com/sharepoint/dev/spfx/set-up-your-developer-tenant)
+### Prerequisites
+-   Node.js v18+ (Recommended: v20 LTS or v22 LTS)
+-   Gulp-cli
+-   Yeoman & SharePoint Generator
 
-> Get your own free development tenant by subscribing to [Microsoft 365 developer program](http://aka.ms/o365devprogram)
+### Local Development
 
-## Prerequisites
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/sagar1503/ApprovalPortal.git
+    cd ApprovalPortal/approval-portal
+    ```
 
-> Any special pre-requisites?
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-## Solution
+3.  **Run the Solution**
+    ```bash
+    gulp serve
+    ```
+    Access the local workbench at:
+    `https://{tenant}.sharepoint.com/_layouts/15/workbench.aspx`
 
-| Solution    | Author(s)                                               |
-| ----------- | ------------------------------------------------------- |
-| folder name | Author details (name, company, twitter alias with link) |
+## ⚙️ Configuration
 
-## Version history
+The application relies on the following SharePoint Lists. Ensure these are created in your site:
 
-| Version | Date             | Comments        |
-| ------- | ---------------- | --------------- |
-| 1.1     | March 10, 2021   | Update comment  |
-| 1.0     | January 29, 2021 | Initial release |
+### 1. Main_Requests
+Primary storage for all approval requests.
+-   **Columns**: RequestType (Text), CurrentStatus (Text), StageID (Number), Requester (Person), CurrentAssignee (Person), JSON_Payload (Note).
 
-## Disclaimer
+### 2. Config_ApprovalMatrix
+Defines the workflow steps and logic.
+-   **Columns**: 
+    -   RequestType (Text)
+    -   StageOrder (Number)
+    -   StageName (Text)
+    -   ApproverType (Choice: 'Dynamic-Manager', 'Static-User', 'Static-Group')
+    -   ApproverValueId (Number/Person)
+    -   Condition (Note) - *JSON Logic e.g., `{"Amount": ">1000"}`*
 
-**THIS CODE IS PROVIDED _AS IS_ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
+### 3. Config_Delegations
+Manages temporary approval reassignment.
+-   **Columns**: Approver (Person), Delegate (Person), StartDate (Date), EndDate (Date).
 
----
+### 4. Sys_AuditLog
+Immutable log of all workflow actions.
+-   **Columns**: RequestID (Lookup), Action (Text), Actor (Person), Comments (Note), Snapshot (Note), Timestamp (Date).
 
-## Minimal Path to Awesome
 
-- Clone this repository
-- Ensure that you are at the solution folder
-- in the command-line run:
-  - `npm install -g @rushstack/heft`
-  - `npm install`
-  - `heft start`
+## 🔮 Future Roadmap
 
-> Include any additional steps as needed.
+-   **Microsoft Teams Integration**: Native Teams app with Adaptive Cards for seamless approvals directly in chat.
+-   **Analytics Dashboard**: Power BI integration to track metrics like "Average Time to Approve" and identify bottlenecks.
+-   **AI-Powered Insights**: Smart grouping of similar requests and anomaly detection for fraud prevention.
+-   **Mobile Experience**: Dedicated, responsive PWA design for optimized on-the-go approvals.
+-   **Document Attachments**: Support for file uploads (PDFs, Images) within requests.
+-   **Multi-Language Support**: Localization to support global deployment.
 
-Other build commands can be listed using `heft --help`.
+## 🏗 Architecture
 
-## Features
+### Workflow Engine (`WorkflowEngine.ts`)
+The core processing logic acting as a state machine. It handles:
+-   **State Transitions**: Moving requests from Stage N to N+1.
+-   **Validation**: Ensuring the current actor is authorized.
+-   **Condition Evaluation**: determining if a stage should be skipped based on request data.
+-   **Notification Dispatching**: Sending emails via `sp.utility.sendEmail`.
 
-Description of the extension that expands upon high-level summary above.
+### Data Service (`AppDataService.ts`)
+Centralized layer for all SharePoint interactions using PnPjs.
+-   Abstracts REST calls for Items, Profiles, and Emails.
+-   Implements retry logic and error handling.
 
-This extension illustrates the following concepts:
-
-- topic 1
-- topic 2
-- topic 3
-
-> Notice that better pictures and documentation will increase the sample usage and the value you are providing for others. Thanks for your submissions advance.
-
-> Share your web part with others through Microsoft 365 Patterns and Practices program to get visibility and exposure. More details on the community, open-source projects and other activities from http://aka.ms/m365pnp.
-
-## References
-
-- [Getting started with SharePoint Framework](https://docs.microsoft.com/sharepoint/dev/spfx/set-up-your-developer-tenant)
-- [Building for Microsoft teams](https://docs.microsoft.com/sharepoint/dev/spfx/build-for-teams-overview)
-- [Use Microsoft Graph in your solution](https://docs.microsoft.com/sharepoint/dev/spfx/web-parts/get-started/using-microsoft-graph-apis)
-- [Publish SharePoint Framework applications to the Marketplace](https://docs.microsoft.com/sharepoint/dev/spfx/publish-to-marketplace-overview)
-- [Microsoft 365 Patterns and Practices](https://aka.ms/m365pnp) - Guidance, tooling, samples and open-source controls for your Microsoft 365 development
-- [Heft Documentation](https://heft.rushstack.io/)
+## 📝 License
+[MIT](LICENSE)
