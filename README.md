@@ -189,19 +189,19 @@ graph TD
 *Central hub for managing approvals and tracking request status.*
 
 ### Request Submission Form
-![Request Form](docs/images/Request%20Form.png)
+![Request Form](docs/images/Request_Form.png)
 *Dynamic form for submitting new approval requests.*
 
 ### Request Details
-![Request Details](docs/images/Approved%20Request.png)
+![Request Details](docs/images/Approved_Request.png)
 *Detailed view of an approved request.*
 
 ### History View
-![History View](docs/images/Personal%20History%20page%20(Requests%20and%20Approvals).png)
+![History View](docs/images/History_View.png)
 *Comprehensive list of all requests submitted and approvals made.*
 
 ### Admin Dashboard
-![Admin Dashboard](docs/images/Admin%20Page.png)
+![Admin Dashboard](docs/images/Admin_Page.png)
 *Exclusive view for administrators to manage matrix configurations and system settings.*
 
 ## 📝 License
