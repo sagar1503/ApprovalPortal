@@ -203,6 +203,3 @@ graph TD
 ### Admin Dashboard
 ![Admin Dashboard](docs/images/Admin_Page.png)
 *Exclusive view for administrators to manage matrix configurations and system settings.*
-
-## 📝 License
-[MIT](LICENSE)
