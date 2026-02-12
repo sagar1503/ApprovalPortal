@@ -185,7 +185,7 @@ graph TD
 > *Note: Placeholders for project screenshots.*
 
 ### Dashboard View
-![Dashboard View](docs/images/Dashboard.png)
+![Dashboard View](docs/images/dashboard_view.png)
 *Central hub for managing approvals and tracking request status.*
 
 ### Request Submission Form
