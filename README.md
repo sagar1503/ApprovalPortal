@@ -192,5 +192,9 @@ graph TD
 ![Request Form](docs/images/request_form.png)
 *Dynamic form for submitting new approval requests.*
 
+### Request Details
+![Request Details](docs/images/request_details.png)
+*Detailed view of a specific request including history and actions.*
+
 ## 📝 License
 [MIT](LICENSE)
