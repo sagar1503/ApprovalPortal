@@ -24,9 +24,9 @@ export class AppDataService {
 
     public async getMyRequests(userId: number): Promise<IRequestItem[]> {
         return await this._sp.web.lists.getByTitle(ListNames.MAIN_REQUESTS).items
-            .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "CurrentAssignee/Title", "CurrentAssignee/Id")
-            .expand("Requester", "CurrentAssignee")
-            .filter(`Requester/Id eq ${userId}`)
+            .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "RequesterId", "RequesterDelegateId", "RequesterDelegate/Title", "RequesterDelegate/Id", "CurrentAssignee/Title", "CurrentAssignee/Id", "CurrentAssigneeId")
+            .expand("Requester", "RequesterDelegate", "CurrentAssignee")
+            .filter(`Requester/Id eq ${userId} or RequesterDelegateId eq ${userId}`)
             .orderBy("Created", false)();
     }
 
@@ -34,8 +34,8 @@ export class AppDataService {
         // Also check for delegations!
         // For MVP, just direct assignment.
         return await this._sp.web.lists.getByTitle(ListNames.MAIN_REQUESTS).items
-            .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "CurrentAssignee/Title", "CurrentAssignee/Id", "JSON_Payload")
-            .expand("Requester", "CurrentAssignee")
+            .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "RequesterId", "RequesterDelegateId", "RequesterDelegate/Title", "RequesterDelegate/Id", "CurrentAssignee/Title", "CurrentAssignee/Id", "CurrentAssigneeId", "JSON_Payload")
+            .expand("Requester", "RequesterDelegate", "CurrentAssignee")
             .filter(`CurrentAssignee/Id eq ${userId}`)
             .orderBy("Created", false)();
     }
@@ -43,8 +43,8 @@ export class AppDataService {
     /** Fetches ALL requests (for admin view). */
     public async getAllRequests(): Promise<IRequestItem[]> {
         return await this._sp.web.lists.getByTitle(ListNames.MAIN_REQUESTS).items
-            .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "CurrentAssignee/Title", "CurrentAssignee/Id", "JSON_Payload")
-            .expand("Requester", "CurrentAssignee")
+            .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "RequesterId", "RequesterDelegateId", "RequesterDelegate/Title", "RequesterDelegate/Id", "CurrentAssignee/Title", "CurrentAssignee/Id", "CurrentAssigneeId", "JSON_Payload")
+            .expand("Requester", "RequesterDelegate", "CurrentAssignee")
             .orderBy("Created", false)
             .top(500)();
     }
@@ -124,8 +124,8 @@ export class AppDataService {
             // Build an OR filter for all request IDs
             const idFilter = requestIds.map(id => `Id eq ${id}`).join(' or ');
             return await this._sp.web.lists.getByTitle(ListNames.MAIN_REQUESTS).items
-                .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "CurrentAssignee/Title", "CurrentAssignee/Id", "JSON_Payload")
-                .expand("Requester", "CurrentAssignee")
+                .select("Id", "Title", "RequestType", "CurrentStatus", "StageID", "Created", "Requester/Title", "Requester/Id", "RequesterId", "RequesterDelegateId", "RequesterDelegate/Title", "RequesterDelegate/Id", "CurrentAssignee/Title", "CurrentAssignee/Id", "CurrentAssigneeId", "JSON_Payload")
+                .expand("Requester", "RequesterDelegate", "CurrentAssignee")
                 .filter(idFilter)
                 .orderBy("Created", false)();
         } catch (err) {
@@ -159,74 +159,9 @@ export class AppDataService {
         }
     }
 
-    /**
-     * Gets the login name for a site user by their ID.
-     */
-    public async getUserLoginName(userId: number): Promise<string> {
-        const user = await this._sp.web.getUserById(userId)();
-        return user.LoginName;
+    public async getUserById(userId: number): Promise<any> {
+        return await this._sp.web.getUserById(userId)();
     }
 
-    /**
-     * Gets the email address for a site user by their ID.
-     */
-    public async getUserEmail(userId: number): Promise<string> {
-        const user = await this._sp.web.getUserById(userId)();
-        return user.Email;
-    }
 
-    /**
-     * Checks Config_Delegations for an active delegation for the given approver.
-     * Returns the delegate's user ID if an active delegation exists, undefined otherwise.
-     */
-    public async getActiveDelegation(approverId: number): Promise<number | undefined> {
-        try {
-            const today = new Date().toISOString();
-            const delegations: IDelegationItem[] = await this._sp.web.lists
-                .getByTitle(ListNames.CONFIG_DELEGATIONS).items
-                .select("Id", "ApproverId", "DelegateId", "StartDate", "EndDate")
-                .filter(`ApproverId eq ${approverId}`)
-                .top(10)();
-
-            // Find first delegation where today falls within [StartDate, EndDate]
-            const activeDelegation = delegations.find(d => {
-                const start = new Date(d.StartDate);
-                const end = new Date(d.EndDate);
-                const now = new Date(today);
-                return now >= start && now <= end;
-            });
-
-            if (activeDelegation) {
-                console.log(`[Delegation] Active delegation found: approver ${approverId} → delegate ${activeDelegation.DelegateId}`);
-                return activeDelegation.DelegateId;
-            }
-            return undefined;
-        } catch (err) {
-            console.warn('[Delegation] Could not check delegations:', err);
-            return undefined;
-        }
-    }
-
-    /**
-     * Sends an email notification via SharePoint's sp.utility.sendEmail.
-     * Runs under the current user's context (email appears from them).
-     * Errors are caught and logged — email failure should never block the workflow.
-     */
-    public async sendNotificationEmail(to: string[], subject: string, body: string): Promise<void> {
-        try {
-            const emailProps: IEmailProperties = {
-                To: to,
-                Subject: subject,
-                Body: body,
-                AdditionalHeaders: {
-                    "content-type": "text/html"
-                }
-            };
-            await this._sp.utility.sendEmail(emailProps);
-            console.log(`[Email] Sent to ${to.join(', ')}: "${subject}"`);
-        } catch (err) {
-            console.error('[Email] Failed to send notification:', err);
-            // Do NOT throw — email failure should not block the workflow
-        }
-    }
 }

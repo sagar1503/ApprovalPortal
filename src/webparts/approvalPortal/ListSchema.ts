@@ -12,6 +12,7 @@ export interface IRequestItem {
     RequestType: string;
     RequesterId: number;
     Requester?: { Title: string, Email: string, Id: number };
+    RequesterDelegate?: { Title: string, Email: string, Id: number };
     CurrentStatus: string;
     CurrentAssigneeId?: number;
     CurrentAssignee?: { Title: string, Email: string, Id: number };

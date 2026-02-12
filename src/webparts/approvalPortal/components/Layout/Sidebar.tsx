@@ -6,6 +6,7 @@ import { HomeRegular, AddRegular, HistoryRegular, SettingsRegular } from '@fluen
 export interface ISidebarProps {
     activeTab: string;
     onTabChange: (tab: string) => void;
+    isAdmin: boolean;
 }
 
 export const Sidebar: React.FunctionComponent<ISidebarProps> = (props) => {
@@ -32,13 +33,15 @@ export const Sidebar: React.FunctionComponent<ISidebarProps> = (props) => {
             >
                 <HistoryRegular fontSize={24} />
             </div>
-            <div
-                className={`${styles.navItem} ${props.activeTab === 'admin' ? styles.active : ''}`}
-                onClick={() => props.onTabChange('admin')}
-                title="Admin"
-            >
-                <SettingsRegular fontSize={24} />
-            </div>
+            {props.isAdmin && (
+                <div
+                    className={`${styles.navItem} ${props.activeTab === 'admin' ? styles.active : ''}`}
+                    onClick={() => props.onTabChange('admin')}
+                    title="Admin"
+                >
+                    <SettingsRegular fontSize={24} />
+                </div>
+            )}
         </div>
     );
 };

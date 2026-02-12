@@ -7,7 +7,7 @@ import "@pnp/sp/items";
 import "@pnp/sp/batching";
 import "@pnp/sp/profiles";
 import "@pnp/sp/site-users/web";
-import "@pnp/sp/sputilities";
+
 
 let _sp: SPFI | null = null;
 

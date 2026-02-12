@@ -68,8 +68,8 @@ export const RequestForm: React.FunctionComponent<IRequestFormProps> = (props) =
                     <label style={{ fontWeight: 600, display: 'block', marginBottom: '5px' }}>Select Requester</label>
                     <PeoplePicker
                         context={props.context as any}
+                        webAbsoluteUrl={props.context.pageContext.web.absoluteUrl}
                         personSelectionLimit={1}
-                        groupName={""}
                         showtooltip={true}
                         required={true}
                         disabled={false}
@@ -86,7 +86,10 @@ export const RequestForm: React.FunctionComponent<IRequestFormProps> = (props) =
                                         // Resolve login name to SharePoint user ID via ensureUser
                                         const loginName = (selectedItem as any).loginName || selectedItem.id || selectedItem.secondaryText;
                                         if (loginName) {
-                                            const { getSP } = await import('../../pnpjsConfig');
+                                            const { getSP } = await import(
+                                                /* webpackChunkName: 'pnpjsConfig' */
+                                                '../../pnpjsConfig'
+                                            );
                                             const sp = getSP();
                                             const ensuredUser = await sp.web.ensureUser(loginName);
                                             setDelegateUser(ensuredUser.Id);
@@ -106,7 +109,7 @@ export const RequestForm: React.FunctionComponent<IRequestFormProps> = (props) =
                         }}
                         showHiddenInUI={false}
                         principalTypes={[PrincipalType.User]}
-                        resolveDelay={1000}
+                        resolveDelay={200}
                     />
                 </div>
             )}

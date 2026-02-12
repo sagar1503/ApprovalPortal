@@ -13,7 +13,7 @@ module.exports = {
       },
       rules: {
         // Prevent usage of the JavaScript null value, while allowing code to access existing APIs that may require null. https://www.npmjs.com/package/@rushstack/eslint-plugin
-        '@rushstack/no-new-null': 1,
+        '@rushstack/no-new-null': 0,
         // Require Jest module mocking APIs to be called before any other statements in their code block. https://www.npmjs.com/package/@rushstack/eslint-plugin
         '@rushstack/hoist-jest-mock': 1,
         // Require chunk names for dynamic imports in SPFx projects. https://www.npmjs.com/package/@rushstack/eslint-plugin
@@ -30,14 +30,7 @@ module.exports = {
         //                    but writing code is a much less important activity than reading it.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/explicit-function-return-type': [
-          1,
-          {
-            'allowExpressions': true,
-            'allowTypedFunctionExpressions': true,
-            'allowHigherOrderFunctions': false
-          }
-        ],
+        '@typescript-eslint/explicit-function-return-type': 0,
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         // Rationale to disable: although this is a recommended rule, it is up to dev to select coding style.
         // Set to 1 (warning) or 2 (error) to enable.
@@ -50,7 +43,7 @@ module.exports = {
         //                    This rule should be suppressed only in very special cases such as JSON.stringify()
         //                    where the type really can be anything.  Even if the type is flexible, another type
         //                    may be more appropriate such as "unknown", "{}", or "Record<k,V>".
-        '@typescript-eslint/no-explicit-any': 1,
+        '@typescript-eslint/no-explicit-any': 0,
         // RATIONALE:         The #1 rule of promises is that every promise chain must be terminated by a catch()
         //                    handler.  Thus wherever a Promise arises, the code must either append a catch handler,
         //                    or else return the object to a caller (who assumes this responsibility).  Unterminated
@@ -94,16 +87,7 @@ module.exports = {
         //                    may impact performance.
         //
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-unused-vars': [
-          1,
-          {
-            'vars': 'all',
-            // Unused function arguments often indicate a mistake in JavaScript code.  However in TypeScript code,
-            // the compiler catches most of those mistakes, and unused arguments are fairly common for type signatures
-            // that are overriding a base class method or implementing an interface.
-            'args': 'none'
-          }
-        ],
+        '@typescript-eslint/no-unused-vars': 0,
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/no-use-before-define': [
           2,

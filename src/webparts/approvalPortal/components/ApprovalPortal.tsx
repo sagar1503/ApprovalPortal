@@ -60,12 +60,17 @@ export default class ApprovalPortal extends React.Component<IApprovalPortalProps
       const user = await this._dataService.getCurrentUser();
       this.setState({ currentUser: user });
 
-      // Check admin group membership
+      // Check admin group membership OR Site Admin status
       let isAdmin = false;
       try {
-        isAdmin = await this._dataService.isUserInGroup('ApprovalPortal - Admins');
+        if (user.IsSiteAdmin) {
+          console.log('User is Site Admin — granting admin access.');
+          isAdmin = true;
+        } else {
+          isAdmin = await this._dataService.isUserInGroup('ApprovalPortal - Admins');
+        }
       } catch (adminErr) {
-        console.warn('Admin group check failed:', adminErr);
+        console.warn('Admin check failed:', adminErr);
       }
 
       // Try to load list data — may fail if lists aren't provisioned yet
@@ -130,13 +135,28 @@ export default class ApprovalPortal extends React.Component<IApprovalPortalProps
         JSON_Payload: formData.JSON_Payload
       };
 
+      // Determine who the effective requester is (for manager lookup)
+      let effectiveRequesterLogin = this.state.currentUser.LoginName;
+
+      if (formData.RequesterDelegateId) {
+        newItem.RequesterDelegateId = formData.RequesterDelegateId;
+        try {
+          // we need to get the login name of the delegate to find their manager
+          const delegateUser = await this._dataService.getUserById(formData.RequesterDelegateId);
+          effectiveRequesterLogin = delegateUser.LoginName;
+        } catch (e) {
+          console.warn('Could not fetch delegate user profile', e);
+        }
+      }
+
+      console.log('Submitting new item:', newItem);
+
       // Assign first approver based on ApproverType
       if (firstStage) {
         if (firstStage.ApproverType === 'Dynamic-Manager') {
           // Try to resolve from user profile first
           try {
-            const currentUserLogin = this.state.currentUser.LoginName;
-            const managerId = await this._dataService.getManagerForUser(currentUserLogin);
+            const managerId = await this._dataService.getManagerForUser(effectiveRequesterLogin);
             if (managerId) {
               newItem.CurrentAssigneeId = managerId;
             } else if (firstStage.ApproverValueId) {
@@ -153,10 +173,6 @@ export default class ApprovalPortal extends React.Component<IApprovalPortalProps
           // Static-User or Static-Group
           newItem.CurrentAssigneeId = firstStage.ApproverValueId;
         }
-      }
-
-      if (formData.RequesterDelegateId) {
-        newItem.RequesterDelegateId = formData.RequesterDelegateId;
       }
 
       await this._dataService.createRequest(newItem);
@@ -199,8 +215,9 @@ export default class ApprovalPortal extends React.Component<IApprovalPortalProps
     const TERMINAL_STATUSES = ['Approved', 'Rejected'];
 
     // Filter for dashboard: only open/active requests
-    const openMyRequests = myRequests.filter(r => TERMINAL_STATUSES.indexOf(r.CurrentStatus) === -1);
-    const openPendingRequests = pendingRequests.filter(r => TERMINAL_STATUSES.indexOf(r.CurrentStatus) === -1);
+    // Using case-insensitive check and trim to be robust against data inconsistencies
+    const openMyRequests = myRequests.filter(r => !TERMINAL_STATUSES.some(t => t.toLowerCase() === (r.CurrentStatus || '').trim().toLowerCase()));
+    const openPendingRequests = pendingRequests.filter(r => !TERMINAL_STATUSES.some(t => t.toLowerCase() === (r.CurrentStatus || '').trim().toLowerCase()));
 
     const getStatusBadge = (status: string): React.CSSProperties => {
       if (status === 'Approved') return { background: '#D1FAE5', color: '#059669' };
@@ -210,7 +227,7 @@ export default class ApprovalPortal extends React.Component<IApprovalPortalProps
     };
 
     return (
-      <PageLayout activeTab={activeTab} onTabChange={this.handleTabChange}>
+      <PageLayout activeTab={activeTab} onTabChange={this.handleTabChange} isAdmin={isAdmin}>
         {loading && <Spinner size={SpinnerSize.large} label="Loading..." />}
 
         {!loading && activeTab === 'home' && (

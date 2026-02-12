@@ -7,12 +7,13 @@ export interface IPageLayoutProps {
     children: React.ReactNode;
     activeTab: string;
     onTabChange: (tab: string) => void;
+    isAdmin: boolean;
 }
 
 export const PageLayout: React.FunctionComponent<IPageLayoutProps> = (props) => {
     return (
         <div className={styles.pageContainer}>
-            <Sidebar activeTab={props.activeTab} onTabChange={props.onTabChange} />
+            <Sidebar activeTab={props.activeTab} onTabChange={props.onTabChange} isAdmin={props.isAdmin} />
             <div className={styles.contentArea}>
                 {props.children}
             </div>

@@ -14,13 +14,13 @@ export interface IRequestDetailProps {
 
 export const RequestDetail: React.FunctionComponent<IRequestDetailProps> = (props) => {
     const [auditLogs, setAuditLogs] = React.useState<IAuditLogItem[]>([]);
-    const [infoResponse, setInfoResponse] = React.useState('');
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
     const payload = JSON.parse(props.request.JSON_Payload || '{}');
     const isApprover = (props.request.CurrentAssignee?.Id || props.request.CurrentAssigneeId) === props.currentUser?.Id;
     const isTerminal = props.request.CurrentStatus === 'Approved' || props.request.CurrentStatus === 'Rejected';
-    const isInfoRequested = props.request.CurrentStatus === 'Info Requested';
-    const isRequester = props.request.RequesterId === props.currentUser?.Id || props.request.Requester?.Id === props.currentUser?.Id;
+
+    console.log('RequestDetail render:', props.request);
+    console.log('RequesterDelegateId:', props.request.RequesterDelegateId);
+    console.log('RequesterDelegate:', props.request.RequesterDelegate);
 
     React.useEffect(() => {
         const dataService = new AppDataService();
@@ -36,20 +36,6 @@ export const RequestDetail: React.FunctionComponent<IRequestDetailProps> = (prop
         if (status === 'Info Requested') return { background: '#FEF3C7', color: '#D97706' };
         return { background: '#EDE9FE', color: '#7C3AED' };
     };
-
-    const handleProvideInfo = async (): Promise<void> => {
-        if (!infoResponse.trim()) return;
-        setIsSubmitting(true);
-        try {
-            props.onAction('ProvideInfo', infoResponse);
-        } finally {
-            setIsSubmitting(false);
-            setInfoResponse('');
-        }
-    };
-
-    // Find the last "RequestInfo" comment from audit logs to show what was asked
-    const infoRequestLog = isInfoRequested ? auditLogs.find(log => log.Action === 'RequestInfo') : undefined;
 
     return (
         <div className={styles.formContainer}>
@@ -72,6 +58,11 @@ export const RequestDetail: React.FunctionComponent<IRequestDetailProps> = (prop
                     <label>Requested By</label>
                     <div style={{ padding: '10px 14px', background: '#F9FAFB', borderRadius: '10px', fontSize: '14px' }}>
                         {props.request.Requester?.Title || 'Unknown'}
+                        {(props.request.RequesterDelegate || props.request.RequesterDelegateId) && (
+                            <div style={{ marginTop: '4px', fontSize: '12px', color: '#6B7280' }}>
+                                (On behalf of: {props.request.RequesterDelegate?.Title || `#${props.request.RequesterDelegateId}`})
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className={styles.formField}>
@@ -113,47 +104,6 @@ export const RequestDetail: React.FunctionComponent<IRequestDetailProps> = (prop
                 </div>
             </div>
 
-            {/* Info Response Panel — shown when status is "Info Requested" and viewer is the requester */}
-            {isInfoRequested && isRequester && (
-                <div className={styles.formField} style={{ marginTop: '8px' }}>
-                    <label style={{ color: '#D97706', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        ⚠️ Information Requested
-                    </label>
-                    {infoRequestLog?.Comments && (
-                        <div style={{
-                            background: '#FFFBEB', border: '1px solid #FDE68A', padding: '12px 16px',
-                            borderRadius: '12px', fontSize: '14px', color: '#92400E', marginBottom: '8px'
-                        }}>
-                            <strong>Approver asked:</strong> &quot;{infoRequestLog.Comments}&quot;
-                        </div>
-                    )}
-                    <textarea
-                        placeholder="Type your response here..."
-                        value={infoResponse}
-                        onChange={(e) => setInfoResponse(e.target.value)}
-                        rows={4}
-                        style={{
-                            width: '100%', padding: '12px 14px', borderRadius: '12px',
-                            border: '1px solid #E5E7EB', fontSize: '14px', fontFamily: 'inherit',
-                            resize: 'vertical', outline: 'none', boxSizing: 'border-box'
-                        }}
-                    />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-                        <button
-                            onClick={handleProvideInfo}
-                            disabled={isSubmitting || !infoResponse.trim()}
-                            style={{
-                                background: '#4F46E5', color: 'white', border: 'none',
-                                padding: '10px 24px', borderRadius: '50px', fontSize: '14px',
-                                fontWeight: 600, cursor: 'pointer', opacity: (isSubmitting || !infoResponse.trim()) ? 0.5 : 1
-                            }}
-                        >
-                            {isSubmitting ? 'Submitting...' : '📤 Submit Response'}
-                        </button>
-                    </div>
-                </div>
-            )}
-
             {/* Audit Trail */}
             <div className={styles.formField} style={{ marginTop: '8px' }}>
                 <label>Approval History</label>
@@ -163,15 +113,15 @@ export const RequestDetail: React.FunctionComponent<IRequestDetailProps> = (prop
                             <div key={idx} style={{
                                 background: '#F9FAFB', padding: '12px 16px', borderRadius: '12px',
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                flexWrap: 'wrap', gap: '8px', borderLeft: `3px solid ${log.Action === 'ProvideInfo' ? '#D97706' : '#4F46E5'}`
+                                flexWrap: 'wrap', gap: '8px', borderLeft: '3px solid #4F46E5'
                             }}>
                                 <div>
                                     <div style={{ fontWeight: 600, fontSize: '14px', color: '#1F2937' }}>
-                                        {log.Action === 'ProvideInfo' ? '💬 Info Provided' : log.Action}
+                                        {log.Action}
                                     </div>
                                     {log.Comments && (
                                         <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>
-                                            &quot;{log.Comments}&quot;
+                                            "{log.Comments}"
                                         </div>
                                     )}
                                 </div>
@@ -188,13 +138,45 @@ export const RequestDetail: React.FunctionComponent<IRequestDetailProps> = (prop
                 )}
             </div>
 
+            {/* Response to Info Request (Only for Assignee when status is Info Requested) */}
+            {isApprover && props.request.CurrentStatus === 'Info Requested' && (
+                <div style={{ marginTop: '20px', padding: '20px', background: '#FEF3C7', borderRadius: '12px', borderLeft: '4px solid #D97706' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#92400E', marginTop: 0 }}>ℹ️ Information Requested</h3>
+                    <p style={{ fontSize: '14px', color: '#B45309' }}>
+                        The approver has requested more information. Please provide details below and submit to resume the approval process.
+                    </p>
+                    <textarea
+                        id="infoResponse"
+                        rows={3}
+                        placeholder="Type your response here..."
+                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB', marginTop: '8px' }}
+                    />
+                    <button
+                        onClick={() => {
+                            const val = (document.getElementById('infoResponse') as HTMLTextAreaElement).value;
+                            if (!val.trim()) {
+                                alert('Please enter a response.');
+                                return;
+                            }
+                            props.onAction('SubmitInfo', val);
+                        }}
+                        style={{
+                            marginTop: '12px', padding: '10px 20px', background: '#D97706', color: 'white',
+                            border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer'
+                        }}
+                    >
+                        Submit Response
+                    </button>
+                </div>
+            )}
+
             {/* Back Button */}
             <div className={styles.buttonRow}>
                 <button className={styles.secondaryButton} onClick={props.onBack}>← Back to Dashboard</button>
             </div>
 
-            {/* Approval Command Bar — only for current approver, non-terminal, and NOT Info Requested */}
-            {isApprover && !isTerminal && !isInfoRequested && (
+            {/* Approval Command Bar — only for current approver AND NOT Info Requested status (which is handled above) */}
+            {isApprover && !isTerminal && props.request.CurrentStatus !== 'Info Requested' && (
                 <ApprovalCommandBar
                     onApprove={(c: string) => props.onAction('Approve', c)}
                     onReject={(c: string) => props.onAction('Reject', c)}
